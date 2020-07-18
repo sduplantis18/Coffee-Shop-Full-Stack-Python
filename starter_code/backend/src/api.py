@@ -18,6 +18,16 @@ CORS(app)
 '''
 db_drop_and_create_all()
 
+# Set up logging
+'''
+error_log = FileHandler('error.log')
+error_log.setFormatter(Formatter(
+    '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+error_log.setLevel(logging.INFO)
+app.logger.setLevel(logging.INFO)
+app.logger.addHandler(error_log)
+'''
+
 ## ROUTES
 '''
 @TODO implement endpoint
@@ -27,7 +37,7 @@ db_drop_and_create_all()
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
-@app.route('/drinks', methods=['GET'])
+@app.route('/drinks')
 def get_drinks():
     #store all drinks in a drinks variable
     drinks = Drink.query.all()
@@ -57,8 +67,7 @@ def get_drinks():
 '''
 @app.route('/drinks-detail', methods=['GET'])
 @requires_auth('get:drinks-detail')
-def headers(payload):
-    print(payload)
+def get_drinks_detail():
     return 'Access Granted'
 '''
 @TODO implement endpoint
@@ -69,6 +78,27 @@ def headers(payload):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks', methods=['POST'])
+@requires_auth('post:drinks')
+def add_new_drink(jwt):
+    
+    #get user input for drink name and recipe
+    body = request.get_json()
+    drink_title = body.get('title', None)
+    print(drink_title)
+    drink_recipe = body.get('recipe', None)
+    print(drink_recipe)
+    try:
+        #insert the above data into the database and throw an error in case it fails
+        drink = Drink(title = drink_title, recipe = json.dumps(drink_recipe))
+        drink.insert()
+    except:
+        abort(422)
+    
+    return jsonify ({
+        'success': True,
+        'drinks': [drink.long()]
+    }), 200
 
 
 '''
@@ -129,7 +159,21 @@ def not_found(error):
 @TODO implement error handler for 404
     error handler should conform to general task above 
 '''
+@app.errorhandler(405)
+def method_not_allowed(error):
+    return jsonify({
+        'success': False,
+        'error': 405,
+        'message': 'method not allowed'
+    }, 405)
 
+ @app.errorhandler(401)
+def unauthorized(error):
+    return jsonify({
+        'success': False,
+        'error': 401,
+        'message': 'unauthorized'
+    } , 401)   
 
 '''
 @TODO implement error handler for AuthError
