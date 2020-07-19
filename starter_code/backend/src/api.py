@@ -67,7 +67,7 @@ def get_drinks():
 '''
 @app.route('/drinks-detail', methods=['GET'])
 @requires_auth('get:drinks-detail')
-def get_drinks_detail():
+def get_drinks_detail(jwt):
     return 'Access Granted'
 '''
 @TODO implement endpoint
@@ -112,6 +112,29 @@ def add_new_drink(jwt):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:id>', methods=['PATCH'])
+@requires_auth('patch:drinks')
+def edit_drink(jwt, id):
+    body = request.get_json()
+    #store selected drink in the drink variable as an drink.id
+    drink = Drink.query.filter(Drink.id == id).one_or_none()
+
+    #get the user input on the selected drink
+    drink_title = body.get('title', None)
+    print(drink_title)
+    drink_recipe = body.get('recipe', None)
+    print(drink_recipe)
+    try:
+        #update the drink record in the db and throw 422 if it fails
+        drink = Drink(title = drink_title, recipe = json.dumps(drink_recipe))
+        drink.update()
+    except:
+        abort(422)
+    
+    return jsonify ({
+        'success':True,
+        'drinks':[drink.long()]
+    }), 200
 
 
 '''
@@ -124,6 +147,25 @@ def add_new_drink(jwt):
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<str:id>', methods=['DELETE'])
+@requires_auth('delete:drinks')
+def delete_drink(jwt, id):
+    #store selected drink in the drink variable as an drink.id
+    drink = Drink.query.filter(Drink.id == id).one_or_none()
+    if not drink:
+        abort(404)
+
+    try:
+        #delete the drink record in the db and throw 422 if it fails
+        drink = Drink(title = drink_title, recipe = json.dumps(drink_recipe))
+        drink.delete()
+    except:
+        abort(422)
+    
+    return jsonify ({
+        'success':True,
+        'delete':id
+    }), 200
 
 
 ## Error Handling
@@ -167,15 +209,16 @@ def method_not_allowed(error):
         'message': 'method not allowed'
     }, 405)
 
+ 
+
+'''
+@TODO implement error handler for AuthError
+    error handler should conform to general task above 
+'''
  @app.errorhandler(401)
 def unauthorized(error):
     return jsonify({
         'success': False,
         'error': 401,
         'message': 'unauthorized'
-    } , 401)   
-
-'''
-@TODO implement error handler for AuthError
-    error handler should conform to general task above 
-'''
+    } , 401)  
