@@ -37,7 +37,7 @@ app.logger.addHandler(error_log)
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
-@app.route('/drinks')
+@app.route('/drinks', methods=['GET'])
 def get_drinks():
     #store all drinks in a drinks variable
     drinks = Drink.query.all()
@@ -45,12 +45,10 @@ def get_drinks():
     #throw an error if no drinks are found
     if total_drinks == 0:
         abort(404)
-    #setup empty drink list
-    drink_list = {}
+
     #loop through the list of drinks and add them to a list
-    for drink in drinks:
-        drink_list[drink.id] = drink.title
-        print(drink_list)
+    drink_list = [drink.short() for drink in drinks]
+   
     
     return jsonify({
         'success':True,
@@ -68,7 +66,19 @@ def get_drinks():
 @app.route('/drinks-detail', methods=['GET'])
 @requires_auth('get:drinks-detail')
 def get_drinks_detail(jwt):
-    return 'Access Granted'
+    #store all drinks in a drinks variable
+    drinks = Drink.query.all()
+    total_drinks = len(drinks)
+    #throw an error if no drinks are found
+    if total_drinks == 0:
+        abort(404)
+    #loop through the list of drinks and add them to a list
+    drink_list = [drink.long() for drink in drinks]
+    
+    return jsonify({
+        'success':True,
+        'drinks':drink_list
+    })
 '''
 @TODO implement endpoint
     POST /drinks
@@ -90,7 +100,7 @@ def add_new_drink(jwt):
     print(drink_recipe)
     try:
         #insert the above data into the database and throw an error in case it fails
-        drink = Drink(title = drink_title, recipe = json.dumps(drink_recipe))
+        drink = Drink(title = drink_title, recipe = json.dumps([drink_recipe]))
         drink.insert()
     except:
         abort(422)
@@ -112,6 +122,7 @@ def add_new_drink(jwt):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
+
 @app.route('/drinks/<int:id>', methods=['PATCH'])
 @requires_auth('patch:drinks')
 def edit_drink(jwt, id):
@@ -147,7 +158,8 @@ def edit_drink(jwt, id):
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
-@app.route('/drinks/<str:id>', methods=['DELETE'])
+
+@app.route('/drinks/<int:id>', methods=['DELETE'])
 @requires_auth('delete:drinks')
 def delete_drink(jwt, id):
     #store selected drink in the drink variable as an drink.id
@@ -215,7 +227,7 @@ def method_not_allowed(error):
 @TODO implement error handler for AuthError
     error handler should conform to general task above 
 '''
- @app.errorhandler(401)
+@app.errorhandler(401)
 def unauthorized(error):
     return jsonify({
         'success': False,

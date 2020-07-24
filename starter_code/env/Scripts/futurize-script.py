@@ -1,4 +1,4 @@
-#!c:\users\sdupl\fsnd\projects\03_coffee_shop_full_stack\starter_code\env\scripts\python.exe
+#!c:\users\sdupl\03_coffee_shop_full_stack\starter_code\env\scripts\python.exe
 # EASY-INSTALL-ENTRY-SCRIPT: 'future==0.18.2','console_scripts','futurize'
 __requires__ = 'future==0.18.2'
 import re
