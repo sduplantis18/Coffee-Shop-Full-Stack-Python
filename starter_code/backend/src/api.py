@@ -19,14 +19,14 @@ CORS(app)
 db_drop_and_create_all()
 
 # Set up logging
-'''
+
 error_log = FileHandler('error.log')
 error_log.setFormatter(Formatter(
     '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
 error_log.setLevel(logging.INFO)
 app.logger.setLevel(logging.INFO)
 app.logger.addHandler(error_log)
-'''
+
 
 ## ROUTES
 '''
@@ -169,14 +169,13 @@ def delete_drink(jwt, id):
 
     try:
         #delete the drink record in the db and throw 422 if it fails
-        drink = Drink(title = drink_title, recipe = json.dumps(drink_recipe))
         drink.delete()
     except:
         abort(422)
     
     return jsonify ({
         'success':True,
-        'delete':id
+        'delete':drink.id
     }), 200
 
 
