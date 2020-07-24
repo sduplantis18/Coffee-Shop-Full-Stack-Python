@@ -18,15 +18,6 @@ CORS(app)
 '''
 db_drop_and_create_all()
 
-# Set up logging
-'''
-error_log = FileHandler('error.log')
-error_log.setFormatter(Formatter(
-    '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
-error_log.setLevel(logging.INFO)
-app.logger.setLevel(logging.INFO)
-app.logger.addHandler(error_log)
-'''
 
 ## ROUTES
 '''
@@ -48,7 +39,6 @@ def get_drinks():
 
     #loop through the list of drinks and add them to a list
     drink_list = [drink.short() for drink in drinks]
-   
     
     return jsonify({
         'success':True,
