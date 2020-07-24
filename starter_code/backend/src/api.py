@@ -19,14 +19,14 @@ CORS(app)
 db_drop_and_create_all()
 
 # Set up logging
-
+'''
 error_log = FileHandler('error.log')
 error_log.setFormatter(Formatter(
     '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
 error_log.setLevel(logging.INFO)
 app.logger.setLevel(logging.INFO)
 app.logger.addHandler(error_log)
-
+'''
 
 ## ROUTES
 '''
@@ -40,7 +40,7 @@ app.logger.addHandler(error_log)
 @app.route('/drinks', methods=['GET'])
 def get_drinks():
     #store all drinks in a drinks variable
-    drinks = Drink.query.all()
+    drinks = Drink.query.order_by(Drink.id).all()
     total_drinks = len(drinks)
     #throw an error if no drinks are found
     if total_drinks == 0:
@@ -53,7 +53,7 @@ def get_drinks():
     return jsonify({
         'success':True,
         'drinks':drink_list
-    })
+    }), 200
 
 '''
 @TODO implement endpoint
