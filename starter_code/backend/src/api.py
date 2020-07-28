@@ -216,6 +216,14 @@ def method_not_allowed(error):
 @TODO implement error handler for AuthError
     error handler should conform to general task above 
 '''
+@app.errorhandler(AuthError)
+def auth_error(error):
+    return jsonify({
+        "success": False,
+        "error": error.status_code,
+        "message": error.error['description']
+    }), error.status_code
+
 @app.errorhandler(401)
 def unauthorized(error):
     return jsonify({
